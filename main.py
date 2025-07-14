@@ -3,6 +3,7 @@ from tkinter import scrolledtext
 import subprocess
 import threading
 from tkinter import ttk
+import configparser
 
 import os
 import signal
@@ -26,7 +27,7 @@ class BotballGUI(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        # âœ… Initialize colors before anything else
+        # Initialize colors before anything else
         self.text_color = TEXT_COLOR
         self.bg_color = BG_COLOR
 
@@ -78,21 +79,19 @@ class BotballGUI(tk.Tk):
 
         recolor(self)
 
-
     def update_colors_loop(self):
         # Read and sum gyro values
-        gyro_value = k.accel_z() * 2.25#k.gyro_x() + k.gyro_y() + k.gyro_z()
-        #print(str(gyro_value))
+        gyro_value = k.accel_z() * 2.25  # k.gyro_x() + k.gyro_y() + k.gyro_z()
 
-        # Clamp to Â±1000
+        # Clamp to ±1000
         gyro_value = max(-1000, min(1000, gyro_value))
 
-        # Map to 0â€“255
+        # Map to 0–255
         normalized = int((gyro_value + 1000) / 2000 * 255)
 
         # Pick a green-blue gradient (adjust mode below)
         # Mode 1: green only
-        #r, g, b = 0, normalized, 0
+        # r, g, b = 0, normalized, 0
 
         # Mode 2: blue only
         # r, g, b = 0, 0, normalized
@@ -106,7 +105,6 @@ class BotballGUI(tk.Tk):
         self.refresh_colors()
 
         self.after(10, self.update_colors_loop)
-
 
     def main_menu(self):
         self.clear_window()
@@ -125,6 +123,9 @@ class BotballGUI(tk.Tk):
 
         top_right_frame = tk.Frame(self, bg=self.bg_color)
         top_right_frame.pack(side=tk.TOP, anchor='ne', padx=10, pady=10)
+        tk.Button(top_right_frame, text="Network", font=("Helvetica", 12),
+                  bg=self.bg_color, fg=self.text_color, highlightbackground=self.text_color,
+                  command=self.network_menu).pack(side=tk.LEFT, padx=5)
         tk.Button(top_right_frame, text="Exit UI", font=("Helvetica", 12),
                   bg=self.bg_color, fg=self.text_color, highlightbackground=self.text_color,
                   command=self.destroy).pack(side=tk.LEFT, padx=5)
@@ -179,6 +180,86 @@ class BotballGUI(tk.Tk):
                 command=lambda p=full_path, n=program_dir: self.launch_program_ui(p, n)
             )
             btn.pack(pady=3, anchor="w", padx=5)
+
+    def network_menu(self):
+        self.clear_window()
+        self.configure(bg=self.bg_color)
+
+        tk.Label(self, text="Network Status", font=("Helvetica", 16),
+                 bg=self.bg_color, fg=self.text_color).pack(pady=10)
+
+        top_right_frame = tk.Frame(self, bg=self.bg_color)
+        top_right_frame.pack(side=tk.TOP, anchor='ne', padx=10, pady=10)
+
+        tk.Button(top_right_frame, text="Back", font=("Helvetica", 12),
+                  bg=self.bg_color, fg=self.text_color, highlightbackground=self.text_color,
+                  command=self.main_menu).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(top_right_frame, text="Exit UI", font=("Helvetica", 12),
+                  bg=self.bg_color, fg=self.text_color, highlightbackground=self.text_color,
+                  command=self.destroy).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(top_right_frame, text="Shutdown Controller", font=("Helvetica", 12),
+                  bg=self.bg_color, fg=self.text_color, highlightbackground=self.text_color,
+                  command=self.shutdown).pack(side=tk.LEFT, padx=5)
+
+        info_frame = tk.Frame(self, bg=self.bg_color)
+        info_frame.pack(pady=20)
+
+        def get_ssid():
+            try:
+                return subprocess.check_output(
+                    ["iwgetid", "-r"], text=True
+                ).strip()
+            except:
+                return "Not connected"
+
+        def get_ip():
+            try:
+                return subprocess.check_output(
+                    ["hostname", "-I"], text=True
+                ).strip().split()[0]
+            except:
+                return "Unknown"
+
+        def get_password(ssid):
+            base_path = "/etc/NetworkManager/system-connections"
+            try:
+                for filename in os.listdir(base_path):
+                    full_path = os.path.join(base_path, filename)
+                    if not os.path.isfile(full_path):
+                        continue
+                    config = configparser.ConfigParser()
+                    # NetworkManager files may have permissions restrictions
+                    try:
+                        config.read(full_path)
+                    except Exception:
+                        continue
+        
+                    # Check if this connection's SSID matches
+                    if 'wifi' in config and 'ssid' in config['wifi']:
+                        if config['wifi']['ssid'] == ssid:
+                            # Extract the password if it exists
+                            if 'wifi-security' in config and 'psk' in config['wifi-security']:
+                                return config['wifi-security']['psk']
+                            else:
+                                return "No password found"
+                return "Unknown"
+            except Exception:
+                return "Unknown"
+
+        ssid = get_ssid()
+        ip = get_ip()
+        password = get_password(ssid)
+
+        tk.Label(info_frame, text=f"Connected to: {ssid}", font=("Helvetica", 14),
+                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
+
+        tk.Label(info_frame, text=f"IP Address: {ip}", font=("Helvetica", 14),
+                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
+
+        tk.Label(info_frame, text=f"Password: {password}", font=("Helvetica", 14),
+                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
 
     def launch_program_ui(self, path, name):
         self.current_program_path = path
