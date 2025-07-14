@@ -10,7 +10,7 @@ cp wombat_launcher.sh wombat_launcher_original.sh
 #Now we can write the new launch file. ui.py and start_wifi.sh will be started later
 echo "Re-writing /home/kipr/wombat_launcher.sh... Find the original at /home/kipr/wombat_launcher_original.sh"
 echo -e "#!/bin/bash \nsudo python3 /home/kipr/ui.py & \n/home/kipr/start_wifi.sh &" > wombat_launcher.sh
-chmod _x wombat_launcher.sh
+chmod +x wombat_launcher.sh
 
 
 #Now we make the ui.py file
