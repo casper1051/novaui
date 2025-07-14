@@ -48,7 +48,7 @@ nmcli connection modify "$SSID" \
   ipv4.method shared \
   ipv6.method ignore
 
-# Optional: Assign static IP (like in C++ code)
+# Optional: Assign static IP (like in the botui)
 nmcli connection modify "$SSID" ipv4.addresses 192.168.125.1/24
 
 # Start the AP
