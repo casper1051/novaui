@@ -5,10 +5,26 @@ DEVICE="wlan0"
 UUID=$(uuidgen)
 
 
-SSID="Test"
-PASSWORD="password"
-RASPBERRY_TYPE="3B+"  # Change to 3B or 3B+ as detected
+SSID=$(/home/kipr/wombat-os/flashFiles/wallaby_get_serial.sh)-wombat
+PASSWORD=$(/home/kipr/wombat-os/flashFiles/wallaby_get_id.sh)
+RASPBERRY_TYPE="3B+"  #Hmm... Pi 5? Maybe? (if you get my reference)
 
+# Find the matching NM connection by SSID
+CON_NAME=$(nmcli -g NAME connection show | grep -F "$SSID")
+
+if [ -z "$CON_NAME" ]; then
+  echo "Connection '$SSID' not found."
+  exit 1
+fi
+
+# Attempt to read the stored password (WPA-PSK normally)
+PASSWORD=$(nmcli -s -g 802-11-wireless-security.psk connection show "$CON_NAME")
+
+if [ -n "$PASSWORD" ]; then
+  echo "$PASSWORD"
+else
+  echo "Password for $SSID not found or not stored in plaintext."
+fi
 
 # Band and channel
 if [[ "$RASPBERRY_TYPE" == "3B+" ]]; then
