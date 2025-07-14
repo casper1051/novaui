@@ -251,16 +251,25 @@ class BotballGUI(tk.Tk):
 
         ssid = get_ssid()
         ip = get_ip()
+
+        if ssid == "Not connected":
+            try:
+                ssid = subprocess.check_output(
+                    ["/home/kipr/wombat-os/flashFiles/wallaby_get_serial.sh"], text=True
+                ).strip() + "-wombat"
+            except Exception as e:
+                ssid = "Unknown"
+                print(f"[ERROR] Failed to get serial for SSID fallback: {e}")
+
         password = get_password(ssid)
-
-        tk.Label(info_frame, text=f"Connected to: {ssid}", font=("Helvetica", 14),
-                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
-
-        tk.Label(info_frame, text=f"IP Address: {ip}", font=("Helvetica", 14),
-                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
-
-        tk.Label(info_frame, text=f"Password: {password}", font=("Helvetica", 14),
-                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
+        if password == "Unknown":
+            try:
+                password = subprocess.check_output(
+                    ["/home/kipr/wombat-os/flashFiles/wallaby_get_id.sh"], text=True
+                ).strip()
+            except Exception as e:
+                password = "Unknown"
+                print(f"[ERROR] Failed to get ID for password fallback: {e}")
 
     def launch_program_ui(self, path, name):
         self.current_program_path = path
