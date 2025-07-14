@@ -4,7 +4,7 @@
 #First we should copy the original script so we can revert back if we want to uninstall
 
 echo "Setting up..."
-cp /home/kipr/
+cd /home/kipr/
 cp wombat_launcher.sh wombat_launcher_original.sh
 
 #Now we can write the new launch file. ui.py and start_wifi.sh will be started later
@@ -18,11 +18,15 @@ wget https://raw.githubusercontent.com/casper1051/novaui/refs/heads/main/main.py
 
 #Move to the right file place
 echo "Moving..."
+rm ui.py #Reinstall to update? Remove files already here
 mv main.py ui.py
 
 #Now for make_wifi.sh
 echo "Fetching wifi AP creation script..."
+
 #TODO: Make client mode
+rm start_wifi.sh
 wget https://raw.githubusercontent.com/casper1051/novaui/refs/heads/main/start_wifi.sh
+
 
 echo "Finished"
