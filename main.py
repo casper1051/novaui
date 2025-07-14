@@ -270,6 +270,12 @@ class BotballGUI(tk.Tk):
             except Exception as e:
                 password = "Unknown"
                 print(f"[ERROR] Failed to get ID for password fallback: {e}")
+        tk.Label(info_frame, text=f"Connected to: {ssid}", font=("Helvetica", 14),
+                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
+        tk.Label(info_frame, text=f"IP Address: {ip}", font=("Helvetica", 14),
+                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
+        tk.Label(info_frame, text=f"Password: {password}", font=("Helvetica", 14),
+                 bg=self.bg_color, fg=self.text_color).pack(pady=5)
 
     def launch_program_ui(self, path, name):
         self.current_program_path = path
