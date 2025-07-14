@@ -222,6 +222,7 @@ class BotballGUI(tk.Tk):
             except:
                 return "Unknown"
 
+        #This only works when program is run with 'sudo'
         def get_password(ssid):
             base_path = "/etc/NetworkManager/system-connections"
             try:
