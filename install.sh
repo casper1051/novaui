@@ -2,7 +2,7 @@
 
 #So the way to launch this UI and not conflict with BotUI is to simply reroute the wombat_launcher.sh start script
 #First we should copy the original script so we can revert back if we want to uninstall
-
+clear
 echo "Setting up..."
 cd /home/kipr/
 cp wombat_launcher.sh wombat_launcher_original.sh
